@@ -24,8 +24,7 @@ org 100h
     mov dl, length
     call get_string     ; get string
     
-    call pthis
-    db 13, 10, 0        ; print new line
+    call print_new_line
                
                
                
@@ -40,10 +39,16 @@ org 100h
     mov si, offset string  
     call print_string       ; print entered string
     
-    call pthis
-    db 13, 10, 0            ; print new line
-
+    call print_new_line
+    
     .exit
+
+; \brief Function to print a new line.
+print_new_line proc
+    call pthis
+    db 13, 10, 0
+    ret    
+print_new_line endp
 
 ; \brief Function to move input string to a variable.
 ; \param ax The base address of the variable to put the input string into.
@@ -67,7 +72,7 @@ END_COPY_STRING_LOOP:
     ret
 move_string_to_var endp    
 
-; Declerations to use specific functions in the emu8086.inc library 
+; Declarations to use specific functions in the emu8086.inc library 
 DEFINE_PTHIS
 DEFINE_PRINT_STRING
 DEFINE_GET_STRING
