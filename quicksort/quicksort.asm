@@ -16,11 +16,96 @@ org 100h
   int 21h
   
   call get_num
+  push dx          
+  
+  call print_newline
+  
+  pop dx
+  call print_num
   
   .exit
 
 ; =============================================================================
-; /brief Function to get number input
+; \brief Function to print a newline
+print_newline proc
+  ; print newline
+  mov dl, 10
+  mov ah, 2
+  int 21h        
+  ; print carriage return
+  mov dl, 13
+  mov ah, 2
+  int 21h
+  ret
+print_newline endp
+
+; =============================================================================
+; \brief Function to print number
+; \param DX The number to print
+print_num proc
+  ; handle if number is negative
+  cmp dx, 0
+  jge NOT_NEG_PRINT_NUM
+    ; print negative symbol
+    push dx
+    mov dl, 45 ; '-'
+    mov ah, 2
+    int 21h
+    
+    ; negate dx for number printing
+    pop dx
+    neg dx
+  NOT_NEG_PRINT_NUM:
+  
+  ; handle if number is 0
+  cmp dx, 0
+  jne NOT_ZERO_PRINT_NUM
+    ; print negative symbol
+    mov dl, 48 ; '0'
+    mov ah, 2
+    int 21h
+    ret
+  NOT_ZERO_PRINT_NUM:
+  
+  ; prepare stack for putting in digits
+  push bp ; save bp value
+  mov bp, sp ; move current sp to bp which will be used to know
+             ; where digits start
+             
+  ; put each digit to stack           
+  mov ax, dx 
+  START_DIGITS_TO_STACK_PRINT_NUM: 
+    mov dx, 0
+    cmp ax, 0
+    je END_DIGITS_TO_STACK_PRINT_NUM
+    
+    mov bx, 10
+    div bx
+    push dx ; put digit to stack 
+    
+    jmp START_DIGITS_TO_STACK_PRINT_NUM
+  END_DIGITS_TO_STACK_PRINT_NUM:
+  
+  ; print each digit to screen
+  START_PRINT_NUM:
+    cmp bp, sp
+    je END_PRINT_NUM
+    
+    pop dx
+    add dx, 48 ; convert to char digit
+    mov ah, 2
+    int 21h
+    
+    jmp START_PRINT_NUM
+  END_PRINT_NUM:
+  
+  pop bp
+  ret
+print_num endp
+
+; =============================================================================
+; \brief Function to get number input
+; \return Number from user saved in DX register
 get_num proc
   push bp ; save bp value
   mov bp, sp ; move current sp to bp which will be used to know
