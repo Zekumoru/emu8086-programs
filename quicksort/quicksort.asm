@@ -36,13 +36,6 @@ get_num proc
     cmp al, 13 ; if char == '\r'
     je END_GET_NUM
     
-    ; prevent '-' inputs if not start of number
-    cmp al, 45
-    jne SKIP_NEG_HANDLER_GET_NUM
-      cmp bp, sp
-      jne START_GET_NUM
-    SKIP_NEG_HANDLER_GET_NUM:
-    
     ; handle backspace input
     cmp al, 8 ; if char != '\b'
     jne SKIP_BACKSPACE_HANDLER_GET_NUM
@@ -63,6 +56,26 @@ get_num proc
       mov ah, 2
       int 21h   ; move cursor back again  
     SKIP_BACKSPACE_HANDLER_GET_NUM:
+    
+    ; prevent further '0' if first digit is zero
+    cmp w.[bp-2], 48
+    jne SKIP_ZERO_HANDLER_GET_NUM
+      jmp START_GET_NUM
+    SKIP_ZERO_HANDLER_GET_NUM:
+    
+    ; prevent further '0' even in negative number
+    cmp w.[bp-2], 45 ; is first digit '-'?
+    jne SKIP_ZERO_SECOND_HANDLER_GET_NUM
+      cmp w.[bp-4], 48 ; is second digit '0'?
+      je START_GET_NUM
+    SKIP_ZERO_SECOND_HANDLER_GET_NUM:
+    
+    ; prevent '-' inputs if not start of number
+    cmp al, 45
+    jne SKIP_NEG_HANDLER_GET_NUM
+      cmp bp, sp
+      jne START_GET_NUM
+    SKIP_NEG_HANDLER_GET_NUM:
     
     ; char must be between 0 and 9 and '-'
     cmp al, 45
