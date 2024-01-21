@@ -147,7 +147,6 @@ quicksort_int proc
   
   ; get mid index to ax
   ; mid = (start + end) / 2
-  mov dx, 0
   add ax, bx
   shr ax, 1 ; divide by 2
   
@@ -318,17 +317,8 @@ print_array endp
 ; \param cx Index of element to calculate
 ; \return si 
 get_actual_index proc
-  push ax ; save ax value
-  push bx ; save bx value
-  
-  mov ax, cx
-  mov bl, 2
-  mul bl
-  add ax, bp
-  mov si, ax
-  
-  pop bx ; restore bx
-  pop ax ; restore ax
+  mov si, cx
+  shl si, 1 ; si = cx * 2
   ret
 get_actual_index endp
 
